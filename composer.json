@@ -10,11 +10,7 @@
     "license": "MIT",
     "require": {
         "php": ">=5.4.0",
-        "illuminate/auth": "5.0.*",
-        "illuminate/session": "5.0.*",
-        "illuminate/database": "5.0.*",
-        "illuminate/support": "5.0.*",
-        "guzzlehttp/guzzle": "~5.0"
+        "adamwathan/eloquent-oauth": "dev-aw-socialnorm"
     },
     "require-dev": {
         "mockery/mockery": "~0.8"
