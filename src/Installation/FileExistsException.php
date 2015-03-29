@@ -1,4 +1,4 @@
-<?php namespace AdamWathan\EloquentOAuth\Installation;
+<?php namespace AdamWathan\EloquentOAuthL5\Installation;
 
 use Exception;
 

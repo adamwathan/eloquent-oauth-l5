@@ -1,4 +1,4 @@
-<?php namespace AdamWathan\EloquentOAuth;
+<?php namespace AdamWathan\EloquentOAuthL5;
 
 use Illuminate\Support\ServiceProvider;
 use GuzzleHttp\Client as HttpClient;
