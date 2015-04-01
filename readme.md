@@ -1,9 +1,6 @@
-# Eloquent OAuth
+# Eloquent OAuth L5
 
-[![Code Climate](https://codeclimate.com/github/adamwathan/eloquent-oauth/badges/gpa.svg)](https://codeclimate.com/github/adamwathan/eloquent-oauth)
-[![Build Status](https://api.travis-ci.org/adamwathan/eloquent-oauth.svg)](https://travis-ci.org/adamwathan/eloquent-oauth)
-
-> Note: Check the [Laravel 4 branch](https://github.com/adamwathan/eloquent-oauth/tree/laravel-4) if you are using Laravel 4.
+> Note: Use the [Laravel 4 package](https://github.com/adamwathan/eloquent-oauth-l4) if you are using Laravel 4.
 
 Eloquent OAuth is a package for Laravel 5 designed to make authentication against various OAuth providers *ridiculously* brain-dead simple. Specify your client IDs and secrets in a config file, run a migration and after that it's just two method calls and you have OAuth integration.
 
@@ -40,7 +37,7 @@ Route::get('facebook/login', function() {
 - Google
 - LinkedIn
 - Instagram
-- SoundCloud
+- Soundcloud
 
 >Feel free to open an issue if you would like support for a particular provider, or even better, submit a pull request.
 
@@ -50,13 +47,7 @@ Route::get('facebook/login', function() {
 
 From the command line inside your project directory, simply type:
 
-`composer require adamwathan/eloquent-oauth`
-
-(Or you can manually edit `composer.json` by adding the following line under the `"require"` section:
-
-`"adamwathan/eloquent-oauth": "~5.0"`
-
-...then run `composer update` to download the package to your vendor directory.)
+`composer require adamwathan/eloquent-oauth-l5`
 
 #### Update your config
 
@@ -65,7 +56,7 @@ Add the service provider to the `providers` array in `config/app.php`:
 ```php
 'providers' => [
     // ...
-    'AdamWathan\EloquentOAuth\EloquentOAuthServiceProvider',
+    'AdamWathan\EloquentOAuthL5\EloquentOAuthServiceProvider',
     // ...
 ]
 ```
@@ -99,9 +90,9 @@ Update your app information for the providers you are using in `config/eloquent-
 ```php
 'providers' => [
     'facebook' => [
-        'id' => '12345678',
-        'secret' => 'y0ur53cr374ppk3y',
-        'redirect' => 'https://example.com/facebook/login'),
+        'client_id' => '12345678',
+        'client_secret' => 'y0ur53cr374ppk3y',
+        'redirect_uri' => 'https://example.com/facebook/login'),
         'scope' => [],
     ]
 ]
@@ -170,22 +161,21 @@ object that contains basic information from the OAuth provider, including:
 
 - User ID
 - Nickname
-- First Name
-- Last Name
+- Full Name
 - Email
-- Image URL
+- Avatar URL
 - Access Token
 
 ```php
 OAuth::login('facebook', function($user, $details) {
     $user->nickname = $details->nickname;
-    $user->name = $details->firstName . ' ' . $details->lastName;
-    $user->profile_image = $details->imageUrl;
+    $user->name = $details->fullName;
+    $user->profile_image = $details->avatar;
     $user->save();
 });
 ```
 
-> Note: The Instagram API does not allow you to retrieve the user's email address, so unfortunately that field will always be `null` for the Instagram provider.
+> Note: The Instagram and Soundcloud APIs do not allow you to retrieve the user's email address, so unfortunately that field will always be `null` for those providers.
 
 ### Advanced: Storing additional data
 
@@ -200,21 +190,21 @@ But, each provider offers its own sets of additional data. If you need to access
    In the `config/eloquent-oauth.php` file, set the `[scope]` in the `facebook` provider section to include the `public_profile` scope, like this:
    
    ```php
-      'scope' => ['email', 'public_profile'],
+      'scope' => ['public_profile'],
    ```
    
  > For available scopes with each provider, consult that provider's API documentation.
 
- > NOTE: By increasing the scope you will be asking the user to grant access to additional information. They will be informed of the scopes you're requesting. If you ask for too much unnecessary data, they may refuse. So exercise restraint when requesting additional scopes.
+ > Note: By increasing the scope you will be asking the user to grant access to additional information. They will be informed of the scopes you're requesting. If you ask for too much unnecessary data, they may refuse. So exercise restraint when requesting additional scopes.
 
 2. Now where you do your `OAuth::login`, store the to your `$user` object by accessing the `$details->raw()['KEY']` data:
 
  ```php
         OAuth::login('facebook', function($user, $details) (
-            $user->gender = $details->raw()['gender']; // Or whatever the key is
+            $user->gender = $details->raw()['gender'];
             $user->save();
         });
  ```
  
- > TIP: You can see what the available keys are by testing with `dd($details->raw());` inside that same closure.
+ > Tip: You can see what the available keys are by testing with `dd($details->raw());` inside that same closure.
 
