@@ -2,16 +2,26 @@
 
 use Illuminate\Support\ServiceProvider;
 use GuzzleHttp\Client as HttpClient;
+use SocialNorm\SocialNorm;
+use SocialNorm\ProviderRegistry;
+use SocialNorm\Request;
+use SocialNorm\StateGenerator;
+use AdamWathan\EloquentOAuth\Authenticator;
+use AdamWathan\EloquentOAuth\IdentityStore;
+use AdamWathan\EloquentOAuth\Session;
+use AdamWathan\EloquentOAuth\OAuthIdentity;
+use AdamWathan\EloquentOAuth\OAuthManager;
+use AdamWathan\EloquentOAuth\UserStore;
 
 class EloquentOAuthServiceProvider extends ServiceProvider {
 
     protected $providerLookup = [
-        'facebook' => 'AdamWathan\\EloquentOAuth\\Providers\\FacebookProvider',
-        'github' => 'AdamWathan\\EloquentOAuth\\Providers\\GitHubProvider',
-        'google' => 'AdamWathan\\EloquentOAuth\\Providers\\GoogleProvider',
-        'linkedin' => 'AdamWathan\\EloquentOAuth\\Providers\\LinkedInProvider',
-        'instagram' => 'AdamWathan\\EloquentOAuth\\Providers\\InstagramProvider',
-        'soundcloud' => 'AdamWathan\\EloquentOAuth\\Providers\\SoundCloudProvider',
+        'facebook' => 'SocialNorm\Facebook\FacebookProvider',
+        'github' => 'SocialNorm\GitHub\GitHubProvider',
+        'google' => 'SocialNorm\Google\GoogleProvider',
+        'linkedin' => 'SocialNorm\LinkedIn\LinkedInProvider',
+        'instagram' => 'SocialNorm\Instagram\InstagramProvider',
+        'soundcloud' => 'SocialNorm\SoundCloud\SoundCloudProvider',
     ];
 
     /**
@@ -36,27 +46,32 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
     protected function registerOAuthManager()
     {
         $this->app['adamwathan.oauth'] = $this->app->share(function ($app) {
+            $providerRegistry = new ProviderRegistry;
+            $session = new Session($app['session']);
+            $request = new Request($app['request']->all());
+            $stateGenerator = new StateGenerator;
+            $socialnorm = new SocialNorm($providerRegistry, $session, $request, $stateGenerator);
+            $this->registerProviders($socialnorm, $request);
+
             $users = new UserStore($app['config']['auth.model']);
-            $stateManager = new StateManager($app['session.store'], $app['request']);
-            $authorizer = new Authorizer($app['redirect']);
-            $authenticator = new Authenticator($app['auth'], $users, new IdentityStore);
-            $oauth = new OAuthManager($authorizer, $authenticator, $stateManager, new ProviderRegistrar);
-            $this->registerProviders($oauth);
+            $authenticator = new Authenticator($app['Illuminate\Contracts\Auth\Guard'], $users, new IdentityStore);
+
+            $oauth = new OAuthManager($app['redirect'], $authenticator, $socialnorm);
             return $oauth;
         });
     }
 
-    protected function registerProviders($oauth)
+    protected function registerProviders($socialnorm, $request)
     {
         if (! $providerAliases = $this->app['config']['eloquent-oauth.providers']) {
             return;
         }
 
         foreach ($providerAliases as $alias => $config) {
-            if(isset($this->providerLookup[$alias])) {
+            if (isset($this->providerLookup[$alias])) {
                 $providerClass = $this->providerLookup[$alias];
-                $provider = new $providerClass($config, new HttpClient, $this->app['request']);
-                $oauth->registerProvider($alias, $provider);
+                $provider = new $providerClass($config, new HttpClient, $request);
+                $socialnorm->registerProvider($alias, $provider);
             }
         }
     }
@@ -72,7 +87,7 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
      */
     public function registerCommands()
     {
-        $this->app->bind('command.eloquent-oauth.install', 'AdamWathan\EloquentOAuth\Installation\InstallCommand');
+        $this->app->bind('command.eloquent-oauth.install', 'AdamWathan\EloquentOAuthL5\Installation\InstallCommand');
         $this->commands('command.eloquent-oauth.install');
     }
 
