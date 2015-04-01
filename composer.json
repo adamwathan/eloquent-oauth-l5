@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": ">=5.4.0",
-        "adamwathan/eloquent-oauth": "dev-aw-socialnorm",
+        "adamwathan/eloquent-oauth": "dev-master",
         "guzzlehttp/guzzle": "~5.0"
     },
     "autoload": {
