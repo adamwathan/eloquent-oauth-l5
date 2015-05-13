@@ -24,12 +24,11 @@ class InstallCommand extends Command
         try {
             $this->publishConfig();
             $this->publishMigrations();
+            $this->composer->dumpAutoloads();
+            $this->comment('Package configuration and migrations installed!');
         } catch (FileExistsException $e) {
             $this->error('It looks like this package has already been installed. Use --force to override.');
         }
-
-        $this->composer->dumpAutoloads();
-        $this->comment('Package configuration and migrations installed!');
     }
 
     public function publishConfig()
