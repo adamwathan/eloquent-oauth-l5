@@ -7,6 +7,7 @@ use SocialNorm\ProviderRegistry;
 use SocialNorm\Request;
 use SocialNorm\StateGenerator;
 use AdamWathan\EloquentOAuth\Authenticator;
+use AdamWathan\EloquentOAuth\EloquentIdentityStore;
 use AdamWathan\EloquentOAuth\IdentityStore;
 use AdamWathan\EloquentOAuth\Session;
 use AdamWathan\EloquentOAuth\OAuthIdentity;
@@ -39,8 +40,16 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
     public function register()
     {
         $this->configureOAuthIdentitiesTable();
+        $this->registerIdentityStore();
         $this->registerOAuthManager();
         $this->registerCommands();
+    }
+
+    protected function registerIdentityStore()
+    {
+        $this->app->singleton('AdamWathan\EloquentOAuth\IdentityStore', function ($app) {
+            return new EloquentIdentityStore;
+        });
     }
 
     protected function registerOAuthManager()
@@ -54,7 +63,12 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
             $this->registerProviders($socialnorm, $request);
 
             $users = new UserStore($app['config']['auth.model']);
-            $authenticator = new Authenticator($app['Illuminate\Contracts\Auth\Guard'], $users, new IdentityStore);
+
+            $authenticator = new Authenticator(
+                $app['Illuminate\Contracts\Auth\Guard'],
+                $users,
+                $app['AdamWathan\EloquentOAuth\IdentityStore']
+            );
 
             $oauth = new OAuthManager($app['redirect'], $authenticator, $socialnorm);
             return $oauth;
