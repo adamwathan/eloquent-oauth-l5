@@ -13,7 +13,7 @@ Eloquent OAuth is a package for Laravel 5 designed to make authentication agains
 ```php
 // Redirect to Facebook for authorization
 Route::get('facebook/authorize', function() {
-    return OAuth::authorize('facebook');
+    return SocialAuth::authorize('facebook');
 });
 
 // Facebook redirects here after authorization
@@ -21,7 +21,7 @@ Route::get('facebook/login', function() {
     
     // Automatically log in existing users
     // or create a new user if necessary.
-    OAuth::login('facebook');
+    SocialAuth::login('facebook');
 
     // Current user is now available via Auth facade
     $user = Auth::user();
@@ -66,7 +66,7 @@ Add the facade to the `aliases` array in `config/app.php`:
 ```php
 'aliases' => [
     // ...
-    'OAuth' => 'AdamWathan\EloquentOAuth\Facades\OAuth',
+    'SocialAuth' => 'AdamWathan\EloquentOAuth\Facades\OAuth',
     // ...
 ]
 ```
@@ -112,11 +112,11 @@ Authentication against an OAuth provider is a multi-step process, but I have tri
 
 First you will need to define the authorization route. This is the route that your "Login" button will point to, and this route redirects the user to the provider's domain to authorize your app. After authorization, the provider will redirect the user back to your second route, which handles the rest of the authentication process.
 
-To authorize the user, simply return the `OAuth::authorize()` method directly from the route.
+To authorize the user, simply return the `SocialAuth::authorize()` method directly from the route.
 
 ```php
 Route::get('facebook/authorize', function() {
-    return OAuth::authorize('facebook');
+    return SocialAuth::authorize('facebook');
 });
 ```
 
@@ -124,7 +124,7 @@ Route::get('facebook/authorize', function() {
 
 Next you need to define a route for authenticating against your app with the details returned by the provider.
 
-For basic cases, you can simply call `OAuth::login()` with the provider name you are authenticating with. If the user
+For basic cases, you can simply call `SocialAuth::login()` with the provider name you are authenticating with. If the user
 rejected your application, this method will throw an `ApplicationRejectedException` which you can catch and handle
 as necessary.
 
@@ -140,7 +140,7 @@ use SocialNorm\Exceptions\InvalidAuthorizationCodeException;
 
 Route::get('facebook/login', function() {
     try {
-        OAuth::login('facebook');
+        SocialAuth::login('facebook');
     } catch (ApplicationRejectedException $e) {
         // User rejected application
     } catch (InvalidAuthorizationCodeException $e) {
@@ -167,7 +167,7 @@ object that contains basic information from the OAuth provider, including:
 - Access Token
 
 ```php
-OAuth::login('facebook', function($user, $details) {
+SocialAuth::login('facebook', function($user, $details) {
     $user->nickname = $details->nickname;
     $user->name = $details->fullName;
     $user->profile_image = $details->avatar;
@@ -197,10 +197,10 @@ But, each provider offers its own sets of additional data. If you need to access
 
  > Note: By increasing the scope you will be asking the user to grant access to additional information. They will be informed of the scopes you're requesting. If you ask for too much unnecessary data, they may refuse. So exercise restraint when requesting additional scopes.
 
-2. Now where you do your `OAuth::login`, store the to your `$user` object by accessing the `$details->raw()['KEY']` data:
+2. Now where you do your `SocialAuth::login`, store the to your `$user` object by accessing the `$details->raw()['KEY']` data:
 
  ```php
-        OAuth::login('facebook', function($user, $details) (
+        SocialAuth::login('facebook', function($user, $details) (
             $user->gender = $details->raw()['gender'];
             $user->save();
         });
