@@ -9,13 +9,16 @@
     ],
     "license": "MIT",
     "require": {
-        "php": ">=5.4.0",
-        "adamwathan/eloquent-oauth": "~7.0",
-        "guzzlehttp/guzzle": "~5.0"
+        "php": ">=5.5.0",
+        "adamwathan/eloquent-oauth": "^8.0",
+        "guzzlehttp/guzzle": "^6.0"
     },
     "autoload": {
         "psr-4": {
             "AdamWathan\\EloquentOAuthL5\\": "src/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
     }
 }
