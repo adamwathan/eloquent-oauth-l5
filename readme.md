@@ -169,7 +169,7 @@ object that contains basic information from the OAuth provider, including:
 ```php
 SocialAuth::login('facebook', function($user, $details) {
     $user->nickname = $details->nickname;
-    $user->name = $details->fullName;
+    $user->name = $details->full_name;
     $user->profile_image = $details->avatar;
     $user->save();
 });
