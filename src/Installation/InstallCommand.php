@@ -2,7 +2,8 @@
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Foundation\Composer;
+use Illuminate\Foundation\Composer as Composer51;
+use Illuminate\Support\Composer as Composer52;
 use Symfony\Component\Console\Input\InputOption;
 
 class InstallCommand extends Command
@@ -12,11 +13,16 @@ class InstallCommand extends Command
     protected $name = 'eloquent-oauth:install';
     protected $description = 'Install package config and migrations';
 
-    public function __construct(Filesystem $filesystem, Composer $composer)
+    public function __construct(Filesystem $filesystem)
     {
         parent::__construct();
         $this->filesystem = $filesystem;
-        $this->composer = $composer;
+
+        if (starts_with(app()->version(), '5.1')) {
+            $this->composer = app(Composer51::class);
+        } else {
+            $this->composer = app(Composer52::class);
+        }
     }
 
     public function handle()
