@@ -62,7 +62,15 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
             $socialnorm = new SocialNorm($providerRegistry, $session, $request, $stateGenerator);
             $this->registerProviders($socialnorm, $request);
 
-            $users = new UserStore($app['config']['auth.model']);
+            if ($app['config']['eloquent-oauth.model']) {
+                $users = new UserStore($app['config']['eloquent-oauth.model']);
+            } else {
+                if (starts_with($app->version(), '5.1')) {
+                    $users = new UserStore($app['config']['auth.model']);
+                } else {
+                    $users = new UserStore($app['config']['auth.providers.users.model']);
+                }
+            }
 
             $authenticator = new Authenticator(
                 $app['Illuminate\Contracts\Auth\Guard'],
