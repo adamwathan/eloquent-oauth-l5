@@ -65,10 +65,10 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
             if ($app['config']['eloquent-oauth.model']) {
                 $users = new UserStore($app['config']['eloquent-oauth.model']);
             } else {
-                if (starts_with($app->version(), '5.1')) {
-                    $users = new UserStore($app['config']['auth.model']);
-                } else {
+                if (starts_with($app->version(), '5.2')) {
                     $users = new UserStore($app['config']['auth.providers.users.model']);
+                } else {
+                    $users = new UserStore($app['config']['auth.model']);
                 }
             }
 
