@@ -18,10 +18,10 @@ class InstallCommand extends Command
         parent::__construct();
         $this->filesystem = $filesystem;
 
-        if (starts_with(app()->version(), '5.1')) {
-            $this->composer = app(Composer51::class);
-        } else {
+        if (starts_with(app()->version(), '5.2')) {
             $this->composer = app(Composer52::class);
+        } else {
+            $this->composer = app(Composer51::class);
         }
     }
 
