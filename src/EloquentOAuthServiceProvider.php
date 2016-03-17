@@ -122,31 +122,31 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
     	//loop over list of custom providers, if any
     	foreach ($this->getCustomProviderConfig() as $alias => $config) {
 
-   			//get the custom provider class name
-   			$providerClass = $this->getCustomProviderClass($config);
+   	    //get the custom provider class name
+   	    $providerClass = $this->getCustomProviderClass($config);
     			
-   			//did the developer provide a custom class?
-   			if (null == $providerClass) {
+   	    //did the developer provide a custom class?
+   	    if (null == $providerClass) {
     				 
-   				//no provider class found, tell dev how to configure
-   				throw new ProviderNotRegisteredException("Custom provide '$alias' does not have a 'provider_class' element in config/eloquent-auth.php");
+                //no provider class found, tell dev how to configure
+                throw new ProviderNotRegisteredException("Custom provide '$alias' does not have a 'provider_class' element in config/eloquent-auth.php");
     				 
-   			} else if (!class_exists($providerClass)) {
+   	    } else if (!class_exists($providerClass)) {
    			
-   				//class does not exist, so give developer a handy hint
-   				throw new ProviderNotRegisteredException("Could not construct '$providerClass' [class_exists() failed] for custom provider '$alias'.");
+                //class does not exist, so give developer a handy hint
+                throw new ProviderNotRegisteredException("Could not construct '$providerClass' [class_exists() failed] for custom provider '$alias'.");
    				
-   			}
+   	    }
     				
-			//create our custom provider
-			$provider = new $providerClass($config, $this->getHttpClient(), $request);
+            //create our custom provider
+            $provider = new $providerClass($config, $this->getHttpClient(), $request);
+    
+            //register provider with OAuth container
+            $socialnorm->registerProvider($alias, $provider);
     				
-			//register provider with OAuth container
-			$socialnorm->registerProvider($alias, $provider);
-    				
-			Log::debug("Registered custom OAuth provider '$alias' as '$providerClass'");
+            Log::debug("Registered custom OAuth provider '$alias' as '$providerClass'");
     			 
-   		} //end foreach: custom providers
+        } //end foreach: custom providers
 
     }
         
