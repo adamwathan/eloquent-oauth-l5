@@ -38,7 +38,7 @@ Route::get('facebook/login', function() {
 - LinkedIn
 - Instagram
 - Soundcloud
-- Custom providers
+- Custom providers (see section at end of readme)
 
 >Feel free to open an issue if you would like support for a particular provider, or even better, submit a pull request.
 
@@ -216,7 +216,7 @@ You can add a custom provider in two (or three) steps.
 
 1. Create a new custom service provider class.
 
-   The easiest way to do this is to simply copy on of the built-in providers (eg. Facebook, Google, etc) and modify it for your needs. Usually you only have to change the URLs, but you may have to fiddle with the specifics a bit. Save this new provider into the Providers folder in your Laravel 5 application, and add it to the 'providers' array in your config/app.php.
+   The easiest way to do this is to simply copy one of the built-in providers (eg. Facebook, Google, etc) and modify it for your needs. Usually you only have to change the URLs, but you may have to fiddle with the specifics a bit. Save this new provider into the Providers folder in your Laravel 5 application, and add it to the 'providers' array in your config/app.php.
 
 2. Add a custom provider definition to config/eloquent-oauth.php.
 
@@ -229,24 +229,24 @@ You can add a custom provider in two (or three) steps.
         'model' => User::class,
         'table' => 'oauth_identities',
 
-   	//NOTE: if you are registering a custom provider, you MUST supply the 'provider_class' attribute 
-	'custom-providers' => [
-	    'myawesomeprovider' => [
-		'client_id' => '12345678',
-		'client_secret' => 'y0ur53cr374ppk3y',
-		'redirect_uri' => 'http://mydomain.com/myawesomeprovider/callback',
-		'scope' => [],
-		'provider_class' => App\Providers\OAuth2\MyAwesomeOAuth2Provider::class 
-	    ],
-	],
+        ///to register a custom provider, you must supply the 'provider_class' attribute 
+        'custom-providers' => [
+            'myawesomeprovider' => [
+                'client_id' => '12345678',
+                'client_secret' => 'y0ur53cr374ppk3y',
+                'redirect_uri' => 'http://mydomain.com/myawesomeprovider/callback', //note the exact provider name here, see below
+                'scope' => [],
+                'provider_class' => App\Providers\OAuth2\MyAwesomeOAuth2Provider::class
+            ],
+        ],
 	
 	
-	///these are the standard eloquent-oauth providers. 
+        ///these are the standard eloquent-oauth providers. 
         'providers' => [
             'facebook' => [
                 'client_id' => '12345678',
-                'client_secret' => 'b15e62b21638d8db571be1dbbf1a186d',
-                'redirect_uri' => 'http://oauth-client.scotchbox.local/facebook/login',
+                'client_secret' => 'y0ur53cr37ppk3y',
+                'redirect_uri' => 'http://mydomain.com/facebook/login',
                 'scope' => [],
             ],
 
@@ -259,30 +259,30 @@ You can add a custom provider in two (or three) steps.
 
    ```php
 
-	//OAuth authorization requests acts as login
-	Route::get('{provider}/authorize', function($provider) {
-            return SocialAuth::authorize($provider);
-	});
+   //OAuth authorization requests acts as login
+   Route::get('{provider}/authorize', function($provider) {
+       return SocialAuth::authorize($provider);
+   });
 		
-	//OAuth redirects here after authorization
-	Route::get('{provider}/callback', function($provider) {
+   //OAuth redirects here after authorization
+   Route::get('{provider}/callback', function($provider) {
 
-	    // Automatically log in existing users
-	    // or create a new user if necessary.
-	    SocialAuth::login($provider, function($user, $details) {
+       // Automatically log in existing users
+       // or create a new user if necessary.
+       SocialAuth::login($provider, function($user, $details) {
 			
-	        //populate the user class.
-                //this will be saved automatically by eloquent-oauth.
-                $user->name = $details->nickname;
-                $user->email = $details->email;
-		//etc...
+           //populate the user class.
+           //this will be saved automatically by eloquent-oauth.
+           $user->name = $details->nickname;
+           $user->email = $details->email;
+           //etc...
 		    		
-            });	  
+       });	  
 		
-	    return Redirect::intended();
+       return Redirect::intended();
 
-	});
+   });
 
    ```
 
-   Note that to use this, your 'redirect_uri' in 'config/eloquent-oauth.php' MUST match the provider name. For example, you must use the form http://domain/PROVIDERNAME/callback.
+   Note that for this configuration to work, your 'redirect_uri' in 'config/eloquent-oauth.php' MUST match the provider name. For example, you must use the form http://domain/PROVIDERNAME/callback.
