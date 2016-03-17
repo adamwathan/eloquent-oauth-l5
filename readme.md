@@ -38,6 +38,7 @@ Route::get('facebook/login', function() {
 - LinkedIn
 - Instagram
 - Soundcloud
+- Custom providers
 
 >Feel free to open an issue if you would like support for a particular provider, or even better, submit a pull request.
 
@@ -208,3 +209,80 @@ But, each provider offers its own sets of additional data. If you need to access
  
  > Tip: You can see what the available keys are by testing with `dd($details->raw());` inside that same closure.
 
+
+#### Adding Custom Providers
+
+You can add a custom provider in two (or three) steps.
+
+1. Create a new custom service provider class.
+
+   The easiest way to do this is to simply copy on of the built-in providers (eg. Facebook, Google, etc) and modify it for your needs. Usually you only have to change the URLs, but you may have to fiddle with the specifics a bit. Save this new provider into the Providers folder in your Laravel 5 application, and add it to the 'providers' array in your config/app.php.
+
+2. Add a custom provider definition to config/eloquent-oauth.php.
+
+   You will need to create a new element called 'custom-providers' at the same level as 'providers'. This has exactly the same syntax as a normal provider configuration, with the addition of the 'provider_class' element. This should contain the fully-qualified name of your custom provider class. For example:
+
+   ```php
+
+    return [
+		
+        'model' => User::class,
+        'table' => 'oauth_identities',
+
+   	//NOTE: if you are registering a custom provider, you MUST supply the 'provider_class' attribute 
+	'custom-providers' => [
+	    'myawesomeprovider' => [
+		'client_id' => '12345678',
+		'client_secret' => 'y0ur53cr374ppk3y',
+		'redirect_uri' => 'http://mydomain.com/myawesomeprovider/callback',
+		'scope' => [],
+		'provider_class' => App\Providers\OAuth2\MyAwesomeOAuth2Provider::class 
+	    ],
+	],
+	
+	
+	///these are the standard eloquent-oauth providers. 
+        'providers' => [
+            'facebook' => [
+                'client_id' => '12345678',
+                'client_secret' => 'b15e62b21638d8db571be1dbbf1a186d',
+                'redirect_uri' => 'http://oauth-client.scotchbox.local/facebook/login',
+                'scope' => [],
+            ],
+
+        ...
+   ```
+
+3. Add routes to App\Http\routes.php
+
+   You can hard-code your custom routes, or you can use a wildcard to match any and all routes:
+
+   ```php
+
+	//OAuth authorization requests acts as login
+	Route::get('{provider}/authorize', function($provider) {
+            return SocialAuth::authorize($provider);
+	});
+		
+	//OAuth redirects here after authorization
+	Route::get('{provider}/callback', function($provider) {
+
+	    // Automatically log in existing users
+	    // or create a new user if necessary.
+	    SocialAuth::login($provider, function($user, $details) {
+			
+	        //populate the user class.
+                //this will be saved automatically by eloquent-oauth.
+                $user->name = $details->nickname;
+                $user->email = $details->email;
+		//etc...
+		    		
+            });	  
+		
+	    return Redirect::intended();
+
+	});
+
+   ```
+
+   Note that to use this, your 'redirect_uri' in 'config/eloquent-oauth.php' MUST match the provider name. For example, you must use the form http://domain/PROVIDERNAME/callback.
