@@ -11,7 +11,7 @@
     "require": {
         "php": ">=5.5.0",
         "adamwathan/eloquent-oauth": "dev-master",
-        "guzzlehttp/guzzle": "^6.0"
+        "guzzlehttp/guzzle": "^6.2.1"
     },
     "autoload": {
         "psr-4": {
