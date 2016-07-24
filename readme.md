@@ -104,6 +104,59 @@ All done!
 
 > Eloquent OAuth is designed to integrate with Laravel's Eloquent authentication driver, so be sure you are using the `eloquent` driver in `app/config/auth.php`. You can define your actual `User` model however you choose and add whatever behavior you need, just be sure to specify the model you are using with its fully qualified namespace in `app/config/auth.php` as well.
 
+#### Custom providers
+
+If you'd like to register a provider for a service that isn't supported out of the box, you can do so by first specifying the configuration needed for that provider in your `config/eloquent-oauth.php`:
+
+```php
+// config/eloquent-oauth.php
+return [
+    'model' => User::class,
+    'table' => 'oauth_identities',
+    'providers' => [
+        'facebook' => [ /* ... */],
+        'google' => [ /* ... */],
+        'gumroad' => [
+            'client_id' => env('GUMROAD_CLIENT_ID'),
+            'client_secret' => env('GUMROAD_CLIENT_SECRET'),
+            'redirect_uri' => env('GUMROAD_REDIRECT_URI'),
+            'scope' => ['view_sales'],
+        ],
+    ],
+];
+```
+
+Then specify which class should be used for that provider  by extending `EloquentOAuthServiceProvider` with your own implementation that maps the provider name to a provider class:
+
+```php
+class MySocialAuthServiceProvider extends EloquentOAuthServiceProvider
+{
+    protected function getProviderLookup()
+    {
+        // Merge the default providers if you like, or override entirely
+        // to skip loading those providers completely.
+        return array_merge($this->providerLookup, [
+            'gumroad' => GumroadProvider::class
+        ]);
+    }
+}
+```
+
+> Don't forget to use your extension of the provider in `config/app.php` instead of the one supplied by the package.
+
+If your provider follows the same `__construct($config, $httpClient, $request)` parameter signature that the default providers use, you're done.
+
+If not, make sure you bind your provider to the IOC container in another provider, and the package will make sure to fetch the implementation from the container instead of trying to construct it itself.
+
+To get an idea of how the providers work, take a look at how the packaged providers are implemented:
+
+- https://github.com/adamwathan/socialnorm-google
+- https://github.com/adamwathan/socialnorm-github
+- https://github.com/adamwathan/socialnorm-instagram
+- https://github.com/adamwathan/socialnorm-soundcloud
+- https://github.com/adamwathan/socialnorm-facebook
+- https://github.com/adamwathan/socialnorm-linkedin
+
 ## Usage
 
 Authentication against an OAuth provider is a multi-step process, but I have tried to simplify it as much as possible.
