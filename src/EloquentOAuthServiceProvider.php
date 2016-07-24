@@ -90,12 +90,23 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
         }
 
         foreach ($providerAliases as $alias => $config) {
-            if (isset($this->providerLookup[$alias])) {
-                $providerClass = $this->providerLookup[$alias];
-                $provider = new $providerClass($config, new HttpClient, $request);
+            if (isset($this->getProviderLookup()[$alias])) {
+                $providerClass = $this->getProviderLookup()[$alias];
+
+                if ($this->app->bound($providerClass)) {
+                    $provider = $this->app->make($providerClass);
+                } else {
+                    $provider = new $providerClass($config, new HttpClient, $request);
+                }
+
                 $socialnorm->registerProvider($alias, $provider);
             }
         }
+    }
+
+    protected function getProviderLookup()
+    {
+        return $this->providerLookup;
     }
 
     protected function configureOAuthIdentitiesTable()
