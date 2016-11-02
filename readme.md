@@ -56,7 +56,7 @@ Add the service provider to the `providers` array in `config/app.php`:
 ```php
 'providers' => [
     // ...
-    'AdamWathan\EloquentOAuthL5\EloquentOAuthServiceProvider::class',
+    AdamWathan\EloquentOAuthL5\EloquentOAuthServiceProvider::class,
     // ...
 ]
 ```
@@ -66,7 +66,7 @@ Add the facade to the `aliases` array in `config/app.php`:
 ```php
 'aliases' => [
     // ...
-    'SocialAuth' => 'AdamWathan\EloquentOAuth\Facades\OAuth::class',
+    'SocialAuth' => AdamWathan\EloquentOAuth\Facades\OAuth::class,
     // ...
 ]
 ```
