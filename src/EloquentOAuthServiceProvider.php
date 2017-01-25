@@ -54,7 +54,7 @@ class EloquentOAuthServiceProvider extends ServiceProvider {
 
     protected function registerOAuthManager()
     {
-        $this->app['adamwathan.oauth'] = $this->app->share(function ($app) {
+        $this->app->singleton('adamwathan.oauth', function ($app) {
             $providerRegistry = new ProviderRegistry;
             $session = new Session($app['session']);
             $request = new Request($app['request']->all());
