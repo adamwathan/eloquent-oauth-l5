@@ -1,4 +1,8 @@
+> **Important: This package is not actively maintained.** For bug fixes and new features, please fork.
+
 # Eloquent OAuth L5
+
+[![This Project Has Been Deprecated.](http://www.repostatus.org/badges/0.1.0/abandoned.svg)](http://www.repostatus.org/#abandoned)
 
 > Note: Use the [Laravel 4 package](https://github.com/adamwathan/eloquent-oauth-l4) if you are using Laravel 4.
 
